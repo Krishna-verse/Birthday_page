@@ -6,9 +6,24 @@ import ThankYouStudio from './ThankYouStudio';
 
 const heroLines = ['Happy Birthday', 'Harshi'];
 const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() || '';
-const authRedirectUrl = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim() || window.location.origin;
+const authRedirectUrlFromEnv = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim() || '';
 const AUTH_COOLDOWN_MS = 60 * 1000;
 const LAST_SIGNED_IN_EMAIL_KEY = 'harshi-7-last-signed-in-email';
+
+const getAuthRedirectUrl = () => {
+  if (typeof window === 'undefined') {
+    return authRedirectUrlFromEnv;
+  }
+
+  if (!authRedirectUrlFromEnv) {
+    return window.location.origin;
+  }
+
+  const isLocalConfigured = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(authRedirectUrlFromEnv);
+  const isProductionHost = !/localhost|127\.0\.0\.1/i.test(window.location.hostname);
+
+  return isProductionHost && isLocalConfigured ? window.location.origin : authRedirectUrlFromEnv;
+};
 
 const getCooldownKey = (value) => `auth-cooldown:${value.trim().toLowerCase()}`;
 
@@ -621,6 +636,7 @@ export default function App() {
     setSendingLink(true);
     setStatus('');
     setError('');
+    const authRedirectUrl = getAuthRedirectUrl();
 
     const { error: authError } = await supabase.auth.signInWithOtp({
       email: trimmedEmail,
@@ -643,7 +659,14 @@ export default function App() {
         const until = Date.now() + AUTH_COOLDOWN_MS;
         writeCooldownUntil(trimmedEmail, until);
         setCooldownRemaining(AUTH_COOLDOWN_MS);
-        setError('Please wait a minute before requesting another link.');
+        setError(
+          'Supabase rate-limited this magic link request. Wait 60 seconds and try again. If it keeps happening, add the email to your Supabase Team allowlist or configure custom SMTP in Supabase Auth.'
+        );
+        console.warn('[auth] magic link rate-limited', {
+          email: trimmedEmail,
+          redirectTo: authRedirectUrl,
+          error: authError
+        });
       } else if (
         message.toLowerCase().includes('smtp') ||
         message.toLowerCase().includes('deliver') ||
@@ -685,6 +708,7 @@ export default function App() {
       return;
     }
 
+    const authRedirectUrl = getAuthRedirectUrl();
     const { error: authError } = await supabase.auth.signInWithOtp({
       email: targetEmail,
       options: {
