@@ -163,7 +163,7 @@ function AuthScreen({
         <div className="auth-note">
           {cooldownRemaining > 0
             ? `Please wait ${formatWaitTime(cooldownRemaining)} before asking for another link.`
-            : `Check your inbox and spam folder. If nothing arrives, your Supabase project may need SMTP enabled or your email added to the project team. The redirect URL is ${authRedirectUrl}.`}
+            : `Check your inbox and spam folder. If nothing arrives, your Supabase project may need SMTP enabled or your email added to the project team. The redirect URL is ${getAuthRedirectUrl()}.`}
         </div>
       </div>
     </div>
