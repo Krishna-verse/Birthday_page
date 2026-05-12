@@ -4,6 +4,10 @@ import { initBirthdaySite } from './site';
 import AdminDashboard from './AdminDashboard';
 import ThankYouStudio from './ThankYouStudio';
 
+if (typeof window !== 'undefined') {
+  window.__reactChatWidgetEnabled = true;
+}
+
 const heroLines = ['Happy Birthday', 'MJ'];
 const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() || '';
 const authRedirectUrlFromEnv = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim() || '';
@@ -66,9 +70,15 @@ const cards = [
   { id: 'rizzCard', title: 'Rizz for You', text: 'Smooth lines only', icon: '\u{1F60F}' }
 ];
 
-const flowerAsset = '/saffron-flower.png';
+const flowerAsset = '/mj_pic2.png';
 const birthdayMonthIndex = 4;
 const birthdayDay = 29;
+const chatQuickActions = [
+  { label: '🎂 Birthday?', query: 'birthday' },
+  { label: '🎈 Age?', query: 'age' },
+  { label: '🎮 Hobbies?', query: 'hobbies' },
+  { label: '🎁 Surprise?', query: 'gift' },
+];
 
 const cardFloatStyles = [
   { x: '14px', y: '18px', duration: '6.2s', delay: '0s' },
@@ -138,6 +148,151 @@ function AnimatedTitle({ ready, tone = 'light' }) {
         </div>
       ))}
     </div>
+  );
+}
+
+const getChatReply = (message) => {
+  const normalized = message.trim().toLowerCase();
+
+  if (!normalized) {
+    return 'Try asking about the birthday, age, hobbies, or the surprise. 💬';
+  }
+
+  if (/(birthday|date|when)/.test(normalized)) {
+    return '7th April, the day we are celebrating here. 🎉';
+  }
+
+  if (/(age|old|years?)/.test(normalized)) {
+    return 'A beautiful legend in the making. 😌';
+  }
+
+  if (/(hobby|hobbies|like|love|interest)/.test(normalized)) {
+    return 'Gaming, good vibes, and making memories. ✨';
+  }
+
+  if (/(gift|surprise|present|gift box)/.test(normalized)) {
+    return 'Open the cards around the page. The surprise is hiding in plain sight. 🎁';
+  }
+
+  if (/(name|who are you|who is this|for)/.test(normalized)) {
+    return 'This page is a little birthday love note for MJ. 💖';
+  }
+
+  if (/(hello|hi|hey|sup)/.test(normalized)) {
+    return 'Hi hi! Ask me anything about the birthday page. 💬';
+  }
+
+  return 'I’m mostly here for birthday details, hobbies, and the little surprises around the page. Ask me one of those and I’ll spill the tea. 😉';
+};
+
+function ChatWidget() {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hi! 👋 Choose a question or type one below.' },
+  ]);
+  const messagesEndRef = useRef(null);
+  const typingTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) {
+      return () => {};
+    }
+
+    messagesEndRef.current?.scrollIntoView({ block: 'end' });
+    return () => {};
+  }, [open, messages, isTyping]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+      }
+    };
+  }, []);
+
+  const sendMessage = (rawText) => {
+    const text = rawText.trim();
+    if (!text || isTyping) {
+      return;
+    }
+
+    setMessages((current) => [...current, { role: 'user', text }]);
+    setDraft('');
+    setIsTyping(true);
+
+    typingTimerRef.current = window.setTimeout(() => {
+      setMessages((current) => [...current, { role: 'assistant', text: getChatReply(text) }]);
+      setIsTyping(false);
+      typingTimerRef.current = undefined;
+    }, 650);
+  };
+
+  return (
+    <>
+      <button
+        id="chatToggle"
+        type="button"
+        aria-expanded={open}
+        aria-controls="chatbot"
+        aria-label={open ? 'Close chat' : 'Open chat'}
+        onClick={() => setOpen((value) => !value)}
+      >
+        💬
+      </button>
+
+      <section
+        id="chatbot"
+        aria-hidden={!open}
+        style={{ display: open ? 'flex' : 'none', flexDirection: 'column' }}
+      >
+        <div id="chatHeader">🤖 Ask About Me</div>
+
+        <div id="chatBody">
+          <div className="chat-log">
+            {messages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}-${message.text}`}
+                className={`chat-msg chat-msg--${message.role}`}
+              >
+                {message.text}
+              </div>
+            ))}
+            {isTyping ? <div className="typing">🤖 Typing</div> : null}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="quick-btns">
+            {chatQuickActions.map((action) => (
+              <button key={action.query} type="button" onClick={() => sendMessage(action.query)}>
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <form
+          className="chat-composer"
+          onSubmit={(event) => {
+            event.preventDefault();
+            sendMessage(draft);
+          }}
+        >
+          <input
+            className="chat-input"
+            type="text"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Ask a question..."
+            aria-label="Type a message"
+          />
+          <button className="chat-send" type="submit" disabled={!draft.trim() || isTyping}>
+            Send
+          </button>
+        </form>
+      </section>
+    </>
   );
 }
 
@@ -276,10 +431,12 @@ function BirthdayExperience({
   }, []);
 
   return (
-    <div className="app-shell">
+      <div className="app-shell">
       <div id="particles-bg" />
       <div id="overlay" className="overlay" />
       <div id="heartFloatLayer" aria-hidden="true" />
+
+      <ChatWidget />
 
       <div className="session-bar">
         {!isAdmin ? (
@@ -295,19 +452,6 @@ function BirthdayExperience({
         </div>
       </div>
       {sessionMessage ? <div className="session-bar__notice">{sessionMessage}</div> : null}
-
-      <div id="chatToggle">💬</div>
-      <div id="chatbot">
-        <div id="chatHeader">🤖 Ask About Me</div>
-        <div id="chatBody">
-          <div className="bot-msg">Hi! 👋 Choose a question:</div>
-          <div className="quick-btns">
-            <button onClick={() => window.quickReply?.('birthday')}>🎂 Birthday?</button>
-            <button onClick={() => window.quickReply?.('age')}>🎈 Age?</button>
-            <button onClick={() => window.quickReply?.('hobby')}>🎮 Hobbies?</button>
-          </div>
-        </div>
-      </div>
 
       <div id="startScreen" className="center birthday-hero">
         <div className="birthday-hero__stage">
@@ -331,7 +475,7 @@ function BirthdayExperience({
             <p className="birthday-hero__copy">Do you want to see your gift?</p>
             <div className="birthday-hero__actions">
               <button id="startBtn" className="birthday-hero__button" type="button">
-                See more surprise
+                Yes
               </button>
               <button
                 className="birthday-hero__button birthday-hero__button--ghost birthday-hero__button--escape"

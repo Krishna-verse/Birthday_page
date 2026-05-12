@@ -1673,6 +1673,8 @@ header p {
   width: 60px;
   height: 60px;
   background: var(--accent-color);
+  border: none;
+  padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1681,6 +1683,8 @@ header p {
   cursor: pointer;
   box-shadow: 0 0 10px var(--primary-glow);
   z-index: 9999;
+  appearance: none;
+  font: inherit;
 }
 
 #chatbot {
@@ -1695,6 +1699,7 @@ header p {
   display: none;
   z-index: 9999;
   font-family: 'Arial Narrow 7', 'Matcha Cih', 'Segoe UI', sans-serif;
+  flex-direction: column;
 }
 
 #chatbot *,
@@ -1714,6 +1719,74 @@ header p {
   overflow-y: auto;
   padding: 10px;
   font-size: 0.9rem;
+}
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-msg {
+  max-width: 88%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.chat-msg--assistant {
+  background: rgba(255, 255, 255, 0.08);
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-msg--user {
+  margin-left: auto;
+  background: #f2f2f2;
+  color: #101010;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-composer {
+  display: flex;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.chat-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.chat-input:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.chat-send {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: var(--primary-color);
+  color: #101010;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .quick-btns {
@@ -2396,12 +2469,12 @@ header p {
   width: 100%;
   transform: none;
   background:
-    url('/saffron-flower.png') left 2% top 8% / 230px auto no-repeat,
-    url('/saffron-flower.png') right 3% top 10% / 220px auto no-repeat,
-    url('/saffron-flower.png') left 8% top 40% / 180px auto no-repeat,
-    url('/saffron-flower.png') right 8% top 44% / 190px auto no-repeat,
-    url('/saffron-flower.png') left 4% bottom 10% / 200px auto no-repeat,
-    url('/saffron-flower.png') right 5% bottom 12% / 205px auto no-repeat,
+    url('/mj_pic2.png') left 2% top 8% / 230px auto no-repeat,
+    url('/mj_pic2.png') right 3% top 10% / 220px auto no-repeat,
+    url('/mj_pic2.png') left 8% top 40% / 180px auto no-repeat,
+    url('/mj_pic2.png') right 8% top 44% / 190px auto no-repeat,
+    url('/mj_pic2.png') left 4% bottom 10% / 200px auto no-repeat,
+    url('/mj_pic2.png') right 5% bottom 12% / 205px auto no-repeat,
     radial-gradient(circle at 18% 30%, rgba(188, 84, 112, 0.16), transparent 11%),
     radial-gradient(circle at 78% 38%, rgba(188, 84, 112, 0.14), transparent 12%),
     radial-gradient(circle at 32% 76%, rgba(188, 84, 112, 0.12), transparent 10%),
@@ -3694,12 +3767,12 @@ header p {
 
   .home-shell::after {
     background:
-      url('/saffron-flower.png') left 2% top 8% / 150px auto no-repeat,
-      url('/saffron-flower.png') right 3% top 10% / 145px auto no-repeat,
-      url('/saffron-flower.png') left 6% top 40% / 120px auto no-repeat,
-      url('/saffron-flower.png') right 7% top 44% / 125px auto no-repeat,
-      url('/saffron-flower.png') left 4% bottom 10% / 130px auto no-repeat,
-      url('/saffron-flower.png') right 5% bottom 12% / 132px auto no-repeat,
+      url('/mj_pic2.png') left 2% top 8% / 150px auto no-repeat,
+      url('/mj_pic2.png') right 3% top 10% / 145px auto no-repeat,
+      url('/mj_pic2.png') left 6% top 40% / 120px auto no-repeat,
+      url('/mj_pic2.png') right 7% top 44% / 125px auto no-repeat,
+      url('/mj_pic2.png') left 4% bottom 10% / 130px auto no-repeat,
+      url('/mj_pic2.png') right 5% bottom 12% / 132px auto no-repeat,
       radial-gradient(circle at 18% 30%, rgba(188, 84, 112, 0.16), transparent 11%),
       radial-gradient(circle at 78% 38%, rgba(188, 84, 112, 0.14), transparent 12%),
       radial-gradient(circle at 32% 76%, rgba(188, 84, 112, 0.12), transparent 10%),
@@ -3743,10 +3816,10 @@ header p {
 
   .home-shell::after {
     background:
-      url('/saffron-flower.png') left 0 top 10% / 110px auto no-repeat,
-      url('/saffron-flower.png') right 0 top 16% / 110px auto no-repeat,
-      url('/saffron-flower.png') left 0 bottom 8% / 96px auto no-repeat,
-      url('/saffron-flower.png') right 0 bottom 10% / 100px auto no-repeat,
+      url('/mj_pic2.png') left 0 top 10% / 110px auto no-repeat,
+      url('/mj_pic2.png') right 0 top 16% / 110px auto no-repeat,
+      url('/mj_pic2.png') left 0 bottom 8% / 96px auto no-repeat,
+      url('/mj_pic2.png') right 0 bottom 10% / 100px auto no-repeat,
       radial-gradient(circle at 18% 30%, rgba(188, 84, 112, 0.12), transparent 11%),
       radial-gradient(circle at 78% 38%, rgba(188, 84, 112, 0.1), transparent 12%);
     opacity: 0.38;

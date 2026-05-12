@@ -329,12 +329,14 @@ function nativeShare() {
 /* =========================
    CHATBOT
 ========================= */
-let chatToggle = document.getElementById("chatToggle");
-let chatbot = document.getElementById("chatbot");
+const chatToggle = document.getElementById("chatToggle");
+const chatbot = document.getElementById("chatbot");
 
-chatToggle.onclick = function () {
-  chatbot.style.display = chatbot.style.display === "block" ? "none" : "block";
-};
+if (chatToggle && chatbot && !window.__reactChatWidgetEnabled) {
+  chatToggle.onclick = function () {
+    chatbot.style.display = chatbot.style.display === "block" ? "none" : "block";
+  };
+}
 
 function quickReply(type) {
   let chatBody = document.getElementById("chatBody");
@@ -1062,7 +1064,6 @@ footer.innerHTML = `
 mainContent.appendChild(footer);
 
 Object.assign(window, {
-  quickReply,
   closeParty,
   closeWish,
   closeShare,
