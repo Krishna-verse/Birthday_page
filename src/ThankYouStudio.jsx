@@ -49,6 +49,54 @@ const slugify = (value) =>
 
 const sanitizeName = (name) => name.replace(/[^a-zA-Z0-9._-]+/g, '-');
 
+const successTypeMeta = {
+  text: { label: 'message', short: 'TXT' },
+  image: { label: 'photo', short: 'PIC' },
+  video: { label: 'video clip', short: 'VID' },
+  audio: { label: 'audio note', short: 'AUD' },
+  file: { label: 'file', short: 'FILE' },
+};
+
+const formatSuccessSentence = (items) => {
+  if (!items.length) {
+    return 'Your thank-you note was sent successfully.';
+  }
+
+  const parts = items.map((item) => `${item.count === 1 ? item.label : `${item.count} ${item.label}s`}`);
+
+  if (parts.length === 1) {
+    return `Your ${parts[0]} was sent successfully.`;
+  }
+
+  if (parts.length === 2) {
+    return `Your ${parts[0]} and ${parts[1]} were sent successfully.`;
+  }
+
+  return `Your ${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]} were sent successfully.`;
+};
+
+const buildSuccessItems = (messageText, attachmentItems) => {
+  const counts = new Map();
+
+  if (messageText) {
+    counts.set('text', 1);
+  }
+
+  attachmentItems.forEach((item) => {
+    counts.set(item.kind, (counts.get(item.kind) || 0) + 1);
+  });
+
+  return Array.from(counts.entries()).map(([kind, count]) => {
+    const meta = successTypeMeta[kind] || successTypeMeta.file;
+    return {
+      kind,
+      count,
+      label: meta.label,
+      short: meta.short,
+    };
+  });
+};
+
 const pickRecorderMime = (kind) => {
   if (typeof MediaRecorder === 'undefined') {
     return '';
@@ -83,6 +131,7 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
   const [cameraMode, setCameraMode] = useState('photo');
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState([]);
+  const [sendSuccess, setSendSuccess] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -106,6 +155,7 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
     if (!open) {
       stopCamera();
       stopRecording(false);
+      setSendSuccess(null);
     }
   }, [open]);
 
@@ -412,7 +462,7 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
     event.target.value = '';
   }
 
-  function clearDraft() {
+  function resetDraft(preserveSuccess = false) {
     setMessage('');
     setStatus('');
     setError('');
@@ -422,6 +472,13 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
       return [];
     });
     stopCamera();
+    if (!preserveSuccess) {
+      setSendSuccess(null);
+    }
+  }
+
+  function clearDraft() {
+    resetDraft(false);
   }
 
   async function handleSend() {
@@ -435,18 +492,25 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
       return;
     }
 
+    if (recordingState !== 'idle') {
+      setError('Stop the current recording before sending.');
+      return;
+    }
+
     setUploading(true);
     setStatus('Sending...');
     setError('');
 
+    const messageText = message.trim();
+    const attachmentSnapshot = [...attachments];
     const bundleId = `${new Date().toISOString().replace(/[:.]/g, '-')}-${slugify(userEmail || 'guest')}-${uid().slice(0, 6)}`;
     const uploads = [];
     const storagePaths = [];
 
-    if (message.trim()) {
+    if (messageText) {
       const notePath = `${bundleId}/thank-you-note.txt`;
       uploads.push({
-        file: new File([message.trim()], 'thank-you-note.txt', { type: 'text/plain' }),
+        file: new File([messageText], 'thank-you-note.txt', { type: 'text/plain' }),
         path: notePath,
       });
       storagePaths.push(notePath);
@@ -455,8 +519,8 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
     const manifest = {
       createdAt: new Date().toISOString(),
       userEmail: userEmail || null,
-      message: message.trim(),
-      attachments: attachments.map((item) => ({
+      message: messageText,
+      attachments: attachmentSnapshot.map((item) => ({
         name: item.name,
         kind: item.kind,
         type: item.file.type,
@@ -501,10 +565,10 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
       const { error: submissionError } = await supabase.from(SUBMISSIONS_TABLE).insert({
         bundle_id: bundleId,
         user_email: userEmail || null,
-        message: message.trim(),
+        message: messageText,
         storage_bucket: STORAGE_BUCKET,
         storage_paths: storagePaths,
-        attachment_meta: attachments.map((item) => ({
+        attachment_meta: attachmentSnapshot.map((item) => ({
           name: item.name,
           kind: item.kind,
           type: item.file.type,
@@ -516,8 +580,14 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
         throw new Error('Could not save your message right now.');
       }
 
-      clearDraft();
-      setStatus('Sent successfully.');
+      const successItems = buildSuccessItems(messageText, attachmentSnapshot);
+      setSendSuccess({
+        bundleId,
+        items: successItems,
+        sentence: formatSuccessSentence(successItems),
+      });
+      resetDraft(true);
+      setStatus('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
       setStatus('');
@@ -529,7 +599,79 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
   return (
     <div className={`thank-you-modal ${open ? 'is-open' : ''}`} aria-hidden={!open}>
       <div className="thank-you-modal__backdrop" onClick={onClose} />
-      <section className="thank-you-modal__panel" role="dialog" aria-modal="true" aria-label="Thank you studio">
+      <section
+        className={`thank-you-modal__panel ${sendSuccess ? 'is-success' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Thank you studio"
+      >
+        {sendSuccess ? (
+          <div className="thank-you-success" role="status" aria-live="polite">
+            <div className="thank-you-success__glow thank-you-success__glow--one" aria-hidden="true" />
+            <div className="thank-you-success__glow thank-you-success__glow--two" aria-hidden="true" />
+            <div className="thank-you-success__card">
+              <div className="thank-you-success__badge">Delivered</div>
+              <div className="thank-you-success__mark" aria-hidden="true">
+                <span>✓</span>
+              </div>
+              <h2>Sent successfully</h2>
+              <p>{sendSuccess.sentence}</p>
+
+              <div className="thank-you-success__items" aria-hidden="true">
+                {sendSuccess.items.map((item, index) => (
+                  <span
+                    className="thank-you-success__item"
+                    key={item.kind}
+                    style={{ '--item-index': index }}
+                  >
+                    <strong>{item.short}</strong>
+                    <small>
+                      {item.count} {item.label}
+                      {item.count === 1 ? '' : 's'}
+                    </small>
+                  </span>
+                ))}
+              </div>
+
+              <div className="thank-you-success__actions">
+                <button
+                  type="button"
+                  className="thank-you-success__button thank-you-success__button--ghost"
+                  onClick={() => {
+                    setSendSuccess(null);
+                    resetDraft(false);
+                    setActiveTool('text');
+                  }}
+                >
+                  Send another
+                </button>
+                <button
+                  type="button"
+                  className="thank-you-success__button thank-you-success__button--solid"
+                  onClick={onClose}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="thank-you-success__confetti" aria-hidden="true">
+              {Array.from({ length: 14 }).map((_, index) => (
+                <span
+                  key={index}
+                  className="thank-you-success__confetti-piece"
+                  style={{
+                    '--left': `${8 + ((index * 7) % 84)}%`,
+                    '--delay': `${index * 90}ms`,
+                    '--duration': `${3400 + (index % 4) * 300}ms`,
+                    '--rotate': `${(index % 2 === 0 ? 1 : -1) * (18 + index * 2)}deg`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="thank-you-modal__header">
           <div>
             <div className="thank-you-modal__badge">Thank You</div>
@@ -753,6 +895,8 @@ export default function ThankYouStudio({ open, onClose, userEmail }) {
             {uploading ? 'Sending...' : 'Send it...'}
           </button>
         </div>
+          </>
+        )}
       </section>
     </div>
   );

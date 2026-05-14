@@ -647,7 +647,7 @@ function BirthdayExperience({
           <h2>😏 Rizz for You</h2>
           <p className="rizz-subtitle">Tap below and get a smooth line ✨</p>
           <button id="generateRizzBtn" className="primary-btn">
-            ✨ Generate Rizz
+            ✨ Get rizz
           </button>
           <div id="rizzOutput" />
           <div id="heartBurstContainer" />
@@ -794,7 +794,6 @@ function SignOutConfirmModal({ open, busy, onCancel, onConfirm }) {
         aria-describedby="signOutDesc"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sign-out-modal__badge">Session control</div>
         <h2 id="signOutTitle">Sign out?</h2>
         <p id="signOutDesc">
           You’ll need to sign in again to get back into the birthday page.
