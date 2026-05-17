@@ -96,62 +96,217 @@ function stopIntroMusicAfterIntroText() {
 
   introMusicStopTimer = setTimeout(stopOnce, toMs(firstAnimationDuration) + toMs(firstAnimationDelay) + 120);
 }
+
 /* =========================
-   PARTICLES
+   COSMIC BACKDROP
 ========================= */
-const isCompactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 480px)").matches;
+const starCanvas = document.getElementById("starCanvas");
+const starCtx = starCanvas?.getContext("2d");
+const cursor = document.getElementById("cursor");
+const cursorTrail = document.getElementById("cursorTrail");
+const petalLayer = document.getElementById("petalLayer");
 const isTouchDevice =
   typeof window !== "undefined" &&
   (navigator.maxTouchPoints > 0 || "ontouchstart" in window);
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COSMIC_THEME = "cosmic";
+const CLASSIC_THEME = "classic";
+let starAnimationFrameId;
+let cursorAnimationFrameId;
+let resizeHandler;
+let mouseMoveHandler;
+let themeChangeHandler;
 
-tsParticles.load("particles-bg", {
-  particles: {
-    number: { value: isCompactViewport ? 18 : 80, density: { enable: true, area: isCompactViewport ? 1200 : 800 } },
-    color: { value: "#d9d9d9" },
-    links: { enable: true, color: "#d9d9d9", distance: isCompactViewport ? 120 : 150 },
-    move: { enable: true, speed: isCompactViewport ? 0.6 : 1 },
-    size: { value: { min: 1, max: isCompactViewport ? 3 : 4 } },
-    opacity: { value: isCompactViewport ? 0.45 : 0.6 }
-  },
-  interactivity: isTouchDevice
-    ? {
-        events: {
-          onHover: { enable: false },
-          onClick: { enable: false }
-        }
-      }
-    : {
-        events: {
-          onHover: { enable: true, mode: "repulse" },
-          onClick: { enable: false }
-        },
-        modes: {
-          repulse: { distance: 120 }
-        }
-      },
-  responsive: [
-    {
-      maxWidth: 768,
-      options: {
-        particles: {
-          number: { value: 30 },
-          links: { distance: 130 }
-        }
-      }
-    },
-    {
-      maxWidth: 480,
-      options: {
-        particles: {
-          number: { value: 18 },
-          links: { distance: 120 },
-          move: { speed: 0.6 },
-          opacity: { value: 0.45 }
-        }
-      }
+function createStars() {
+  if (!starCanvas || !starCtx) {
+    return [];
+  }
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const count = width < 480 ? 90 : width < 768 ? 130 : 180;
+
+  return Array.from({ length: count }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    r: Math.random() * 1.5 + 0.35,
+    speed: Math.random() * 0.28 + 0.05,
+    twinkle: Math.random() * Math.PI * 2
+  }));
+}
+
+let stars = createStars();
+
+function resizeStarCanvas() {
+  if (!starCanvas || !starCtx) {
+    return;
+  }
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  starCanvas.width = Math.max(1, Math.floor(width * dpr));
+  starCanvas.height = Math.max(1, Math.floor(height * dpr));
+  starCanvas.style.width = `${width}px`;
+  starCanvas.style.height = `${height}px`;
+  starCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  stars = createStars();
+}
+
+function drawStars() {
+  if (!starCanvas || !starCtx) {
+    return;
+  }
+
+  starCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  stars.forEach((star) => {
+    star.twinkle += 0.018;
+    const alpha = 0.28 + 0.52 * Math.abs(Math.sin(star.twinkle));
+
+    starCtx.beginPath();
+    starCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+    starCtx.fillStyle = `rgba(255, 248, 240, ${alpha})`;
+    starCtx.fill();
+
+    star.y -= star.speed;
+    if (star.y < -5) {
+      star.y = window.innerHeight + 5;
+      star.x = Math.random() * window.innerWidth;
     }
-  ]
-});
+  });
+
+  starAnimationFrameId = window.requestAnimationFrame(drawStars);
+}
+
+function setupCursorTrail() {
+  if (isTouchDevice || !cursor || !cursorTrail) {
+    return () => {};
+  }
+
+  let mx = window.innerWidth / 2;
+  let my = window.innerHeight / 2;
+  let tx = mx;
+  let ty = my;
+
+  cursor.style.left = `${mx}px`;
+  cursor.style.top = `${my}px`;
+  cursorTrail.style.left = `${tx}px`;
+  cursorTrail.style.top = `${ty}px`;
+
+  mouseMoveHandler = (event) => {
+    mx = event.clientX;
+    my = event.clientY;
+    cursor.style.left = `${mx}px`;
+    cursor.style.top = `${my}px`;
+  };
+
+  document.addEventListener("mousemove", mouseMoveHandler);
+
+  const animateTrail = () => {
+    tx += (mx - tx) * 0.15;
+    ty += (my - ty) * 0.15;
+    cursorTrail.style.left = `${tx}px`;
+    cursorTrail.style.top = `${ty}px`;
+    cursorAnimationFrameId = window.requestAnimationFrame(animateTrail);
+  };
+
+  cursorAnimationFrameId = window.requestAnimationFrame(animateTrail);
+
+  return () => {
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    if (cursorAnimationFrameId) {
+      window.cancelAnimationFrame(cursorAnimationFrameId);
+    }
+  };
+}
+
+function spawnPetals() {
+  if (isTouchDevice || prefersReducedMotion || !petalLayer) {
+    return;
+  }
+
+  const petals = ["🌸", "✨", "🎊", "⭐", "💛", "🎈", "🌟", "💫", "🎉"];
+
+  for (let i = 0; i < 18; i++) {
+    const petal = document.createElement("span");
+    petal.className = "petal";
+    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+    petal.style.left = `${Math.random() * 100}vw`;
+    petal.style.animationDuration = `${7 + Math.random() * 8}s`;
+    petal.style.animationDelay = `${Math.random() * 8}s`;
+    petal.style.fontSize = `${0.9 + Math.random() * 1.2}rem`;
+    petalLayer.appendChild(petal);
+  }
+}
+
+function clearPetals() {
+  if (petalLayer) {
+    petalLayer.innerHTML = "";
+  }
+}
+
+function syncBackdropTheme(nextTheme) {
+  if (nextTheme === CLASSIC_THEME) {
+    clearPetals();
+    return;
+  }
+
+  if (petalLayer && !petalLayer.childElementCount) {
+    spawnPetals();
+  }
+}
+
+function setupCosmicBackdrop() {
+  const stopCursorTrail = setupCursorTrail();
+
+  if (starCanvas && starCtx) {
+    resizeHandler = () => {
+      resizeStarCanvas();
+    };
+
+    resizeStarCanvas();
+    window.addEventListener("resize", resizeHandler);
+    drawStars();
+  }
+
+  syncBackdropTheme(document.body?.dataset.theme || COSMIC_THEME);
+
+  themeChangeHandler = (event) => {
+    const nextTheme = event.detail?.theme || document.body?.dataset.theme || COSMIC_THEME;
+    syncBackdropTheme(nextTheme);
+  };
+  window.addEventListener("birthday:theme-change", themeChangeHandler);
+
+  return () => {
+    stopCursorTrail();
+
+    if (themeChangeHandler) {
+      window.removeEventListener("birthday:theme-change", themeChangeHandler);
+    }
+
+    if (resizeHandler) {
+      window.removeEventListener("resize", resizeHandler);
+    }
+
+    if (starAnimationFrameId) {
+      window.cancelAnimationFrame(starAnimationFrameId);
+    }
+
+    if (cursorAnimationFrameId) {
+      window.cancelAnimationFrame(cursorAnimationFrameId);
+    }
+
+    if (petalLayer) {
+      clearPetals();
+    }
+  };
+}
+
+const stopCosmicBackdrop = setupCosmicBackdrop();
 
 /* =========================
    START FLOW
@@ -1079,8 +1234,11 @@ const footer = document.createElement("footer");
 footer.className = "site-footer";
 footer.innerHTML = `
   <div class="site-footer__inner">
-    <span class="site-footer__badge">Made with love</span>
-    <p>Happy Birthday, MJ</p>
+    <div class="site-footer__copy">
+      <span class="site-footer__badge">Made with love</span>
+      <p>Happy Birthday, MJ</p>
+    </div>
+    <button class="site-footer__button" id="footerSignOutBtn" type="button">Sign out</button>
   </div>
 `;
 mainContent.appendChild(footer);
@@ -1118,6 +1276,7 @@ return () => {
   if (audioPlayer) audioPlayer.pause();
   if (bgLoop) bgLoop.pause();
   stopIntroMusic();
+  if (stopCosmicBackdrop) stopCosmicBackdrop();
 };
 }
 

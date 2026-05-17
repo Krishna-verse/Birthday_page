@@ -13,6 +13,9 @@ const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() || '';
 const authRedirectUrlFromEnv = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim() || '';
 const AUTH_COOLDOWN_MS = 60 * 1000;
 const LAST_SIGNED_IN_EMAIL_KEY = 'harshi-7-last-signed-in-email';
+const THEME_STORAGE_KEY = 'harshi-7-theme';
+const COSMIC_THEME = 'cosmic';
+const CLASSIC_THEME = 'classic';
 
 const getAuthRedirectUrl = () => {
   if (typeof window === 'undefined') {
@@ -70,10 +73,41 @@ const cards = [
   { id: 'rizzCard', title: 'Rizz for You', text: 'Smooth lines only', icon: '\u{1F60F}' }
 ];
 
+const birthdayTimeline = [
+  {
+    step: '01',
+    date: 'The first spark',
+    title: 'Everything started feeling a little more special',
+    text: 'That tiny moment when the birthday story stopped being ordinary and started feeling like a memory worth keeping.',
+    icon: '\u2728'
+  },
+  {
+    step: '02',
+    date: 'The vibe check',
+    title: 'Laughs, chaos, and random little moments',
+    text: 'Inside jokes, late replies, and the kind of energy that turns normal days into highlights.',
+    icon: '\u{1F9E1}'
+  },
+  {
+    step: '03',
+    date: 'The memory vault',
+    title: 'The soft moments we keep coming back to',
+    text: 'A tiny archive of the best bits: the calm ones, the funny ones, and the ones that stick forever.',
+    icon: '\u{1F4DA}'
+  },
+  {
+    step: '04',
+    date: 'This birthday',
+    title: 'More joy, more wins, more good days',
+    text: 'A fresh year, a brighter mood, and a wish that the best chapters are still ahead.',
+    icon: '\u{1F389}'
+  }
+];
+
 const flowerAsset = '/mj_pic2.png';
 const heroBackgroundVideo = '/bg_video.mp4';
-const birthdayMonthIndex = 4;
-const birthdayDay = 29;
+const birthdayMonthIndex = 3;
+const birthdayDay = 7;
 const chatQuickActions = [
   { label: '🎁 Surprise clue', query: 'What should I open first?' },
   { label: '🎂 Birthday date', query: 'birthday date' },
@@ -91,6 +125,28 @@ const cardFloatStyles = [
   { x: '-15px', y: '19px', duration: '6.5s', delay: '0.5s' },
   { x: '12px', y: '15px', duration: '6.1s', delay: '0.12s' },
   { x: '-14px', y: '18px', duration: '6.7s', delay: '0.42s' }
+];
+
+const cosmicEmojiFloats = [
+  { emoji: '🎂', top: '54%', left: '10%', size: '1.35rem', duration: '7.8s', delay: '0s' },
+  { emoji: '✨', top: '22%', left: '22%', size: '1.05rem', duration: '6.5s', delay: '0.3s' },
+  { emoji: '🎉', top: '68%', left: '31%', size: '1.25rem', duration: '7.2s', delay: '0.55s' },
+  { emoji: '💫', top: '28%', left: '78%', size: '1.2rem', duration: '6.9s', delay: '0.2s' },
+  { emoji: '🌟', top: '58%', left: '86%', size: '1.15rem', duration: '8s', delay: '0.75s' },
+  { emoji: '🪐', top: '40%', left: '69%', size: '1.1rem', duration: '7.4s', delay: '0.45s' },
+  { emoji: '🎈', top: '16%', left: '58%', size: '1rem', duration: '6.8s', delay: '0.15s' },
+  { emoji: '💙', top: '76%', left: '57%', size: '1.05rem', duration: '7.6s', delay: '0.6s' }
+];
+
+const birthdayFinaleSparkles = [
+  { symbol: '✦', top: '10%', left: '8%', size: '0.75rem', duration: '6.2s', delay: '0s' },
+  { symbol: '•', top: '22%', left: '18%', size: '0.45rem', duration: '5.2s', delay: '0.4s' },
+  { symbol: '✧', top: '16%', left: '36%', size: '0.7rem', duration: '6.8s', delay: '0.15s' },
+  { symbol: '✨', top: '26%', left: '72%', size: '0.9rem', duration: '6s', delay: '0.6s' },
+  { symbol: '✦', top: '12%', left: '88%', size: '0.72rem', duration: '5.7s', delay: '0.25s' },
+  { symbol: '•', top: '66%', left: '14%', size: '0.4rem', duration: '5.4s', delay: '0.7s' },
+  { symbol: '✧', top: '72%', left: '82%', size: '0.72rem', duration: '6.4s', delay: '0.5s' },
+  { symbol: '✨', top: '82%', left: '52%', size: '0.82rem', duration: '6.6s', delay: '0.2s' }
 ];
 
 const getNextBirthdayTarget = (referenceTime = Date.now()) => {
@@ -112,20 +168,35 @@ const formatBirthdayCountdown = (referenceTime = Date.now()) => {
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
+  const dayLabel = days === 1 ? 'DAY' : 'DAYS';
 
   return {
     value: remaining === 0
       ? 'TODAY'
-      : `${String(days).padStart(2, '0')}D ${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M ${String(seconds).padStart(2, '0')}S`,
+      : days > 0
+        ? `${days} ${dayLabel} LEFT`
+        : `${hours} HOUR${hours === 1 ? '' : 'S'} LEFT`,
+    detail: remaining === 0
+      ? 'TIME TO CELEBRATE'
+      : `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M ${String(seconds).padStart(2, '0')}S`,
   };
 };
 
 function BirthdayCountdown({ now }) {
   const countdown = formatBirthdayCountdown(now);
+  const detailId = 'birthday-countdown-detail';
 
   return (
-    <div className="hero-chip birthday-hero__chip birthday-hero__chip--countdown" aria-label={`Birthday countdown ${countdown.value}`}>
+    <div
+      className="hero-chip birthday-hero__chip birthday-hero__chip--countdown"
+      aria-label={`Birthday countdown ${countdown.value}${countdown.detail ? `, ${countdown.detail}` : ''}`}
+      aria-describedby={detailId}
+    >
+      <span className="birthday-hero__chip-label">Countdown</span>
       <span className="birthday-hero__chip-value">{countdown.value}</span>
+      <span className="birthday-hero__chip-detail" id={detailId}>
+        {countdown.detail}
+      </span>
     </div>
   );
 }
@@ -424,6 +495,8 @@ function BirthdayExperience({
   userEmail,
   isAdmin,
   sessionMessage,
+  theme,
+  onToggleTheme,
 }) {
   const [heroReady, setHeroReady] = useState(false);
   const [cardsVisible, setCardsVisible] = useState(false);
@@ -433,6 +506,7 @@ function BirthdayExperience({
   const [clockNow, setClockNow] = useState(() => Date.now());
   const cardsTimer = useRef(null);
   const cleanupRef = useRef(null);
+  const isCosmicTheme = theme === COSMIC_THEME;
 
   const moveNotInterestedButton = (event) => {
     const touchPoint = event.touches?.[0] || event.changedTouches?.[0];
@@ -490,26 +564,56 @@ function BirthdayExperience({
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const footerSignOutButton = document.getElementById('footerSignOutBtn');
+
+    if (!footerSignOutButton) {
+      return () => {};
+    }
+
+    const handleFooterSignOut = (event) => {
+      event.preventDefault();
+      onSignOut();
+    };
+
+    footerSignOutButton.addEventListener('click', handleFooterSignOut);
+
+    return () => {
+      footerSignOutButton.removeEventListener('click', handleFooterSignOut);
+    };
+  }, [onSignOut]);
+
   return (
-      <div className="app-shell">
-      <div id="particles-bg" />
+    <div className="app-shell">
+      <div id="particles-bg" aria-hidden="true">
+        <canvas id="starCanvas" aria-hidden="true" />
+      </div>
+      <div className="cursor" id="cursor" aria-hidden="true" />
+      <div className="cursor-trail" id="cursorTrail" aria-hidden="true" />
+      <div className="petal-layer" id="petalLayer" aria-hidden="true" />
       <div id="overlay" className="overlay" />
       <div id="heartFloatLayer" aria-hidden="true" />
 
       <ChatWidget />
 
       <div className="session-bar">
+        <div className="session-bar__actions">
+          <button
+            className="session-bar__button session-bar__button--theme"
+            type="button"
+            onClick={onToggleTheme}
+            aria-pressed={theme === COSMIC_THEME}
+            aria-label={`Switch to ${theme === COSMIC_THEME ? 'classic' : 'cosmic'} theme`}
+          >
+            {theme === COSMIC_THEME ? 'Classic' : 'Cosmic'}
+          </button>
+        </div>
         {!isAdmin ? (
           <div className="session-bar__meta">
             <span className="session-bar__label">Signed in</span>
             <span className="session-bar__email">{userEmail || 'Saved session'}</span>
           </div>
         ) : null}
-        <div className="session-bar__actions">
-          <button className="session-bar__button" type="button" onClick={onSignOut}>
-            Sign out
-          </button>
-        </div>
       </div>
       {sessionMessage ? <div className="session-bar__notice">{sessionMessage}</div> : null}
 
@@ -526,6 +630,31 @@ function BirthdayExperience({
           >
             <source src={heroBackgroundVideo} />
           </video>
+          {isCosmicTheme ? (
+            <div className="birthday-hero__cosmic-layer" aria-hidden="true">
+              <span className="birthday-hero__orbit birthday-hero__orbit--one" />
+              <span className="birthday-hero__orbit birthday-hero__orbit--two" />
+              <div className="birthday-hero__planet">
+                <span className="birthday-hero__planet-glow" />
+                <span className="birthday-hero__planet-core" />
+              </div>
+              {cosmicEmojiFloats.map((item) => (
+                <span
+                  key={`${item.emoji}-${item.left}-${item.top}`}
+                  className="birthday-hero__cosmic-emoji"
+                  style={{
+                    top: item.top,
+                    left: item.left,
+                    fontSize: item.size,
+                    animationDuration: item.duration,
+                    animationDelay: item.delay,
+                  }}
+                >
+                  {item.emoji}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <div className="birthday-hero__content">
             <BirthdayCountdown now={clockNow} />
             <div className="birthday-hero__title-row">
@@ -663,6 +792,71 @@ function BirthdayExperience({
               <span className="feature-card__badge">{isAdmin ? 'Open responses' : 'Open the studio'}</span>
               <div className="feature-card__shine" />
             </article>
+          </div>
+        </section>
+        <section className={`timeline-stage ${cardsVisible ? 'is-visible' : ''}`} aria-labelledby="timelineTitle">
+          <div className="timeline-stage__panel">
+            <div className="timeline-stage__copy">
+              <span className="timeline-stage__eyebrow">Mini timeline</span>
+              <div className="timeline-stage__title-row">
+                <h3 id="timelineTitle">A small story of the moments that matter</h3>
+              </div>
+            </div>
+
+            <div className="timeline-rail" aria-hidden="true">
+              <span />
+            </div>
+
+            <ol className="timeline-grid">
+              {birthdayTimeline.map((item, index) => (
+                <li
+                  className="timeline-item"
+                  key={item.step}
+                  style={{ '--timeline-delay': `${index * 130}ms` }}
+                >
+                  <article className="timeline-card">
+                    <span className="timeline-card__step">{item.step}</span>
+                    <div className="timeline-card__icon" aria-hidden="true">
+                      {item.icon}
+                    </div>
+                    <div className="timeline-card__date">{item.date}</div>
+                    <h4>{item.title}</h4>
+                    <p>{item.text}</p>
+                    <div className="timeline-card__glow" />
+                  </article>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+        <section className={`birthday-finale ${cardsVisible ? 'is-visible' : ''}`} aria-label="Birthday finale">
+          <div className="birthday-finale__sparkles" aria-hidden="true">
+            {birthdayFinaleSparkles.map((sparkle, index) => (
+              <span
+                key={`${sparkle.symbol}-${index}`}
+                className="birthday-finale__sparkle"
+                style={{
+                  top: sparkle.top,
+                  left: sparkle.left,
+                  fontSize: sparkle.size,
+                  animationDuration: sparkle.duration,
+                  animationDelay: sparkle.delay,
+                }}
+              >
+                {sparkle.symbol}
+              </span>
+            ))}
+          </div>
+          <div className="birthday-finale__panel">
+            <h2 className="birthday-finale__title">
+              <span>Happy</span>
+              <span>Birthday</span>
+            </h2>
+            <div className="birthday-finale__name-row">
+              <span className="birthday-finale__name">Samruddhi</span>
+              <span className="birthday-finale__cake" aria-hidden="true">🎂</span>
+            </div>
+            <p>Wishing you all the magic this world holds ✨</p>
           </div>
         </section>
       </main>
@@ -874,6 +1068,14 @@ export default function App() {
   const [roleLoading, setRoleLoading] = useState(false);
   const [role, setRole] = useState(null);
   const [activeView, setActiveView] = useState('home');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') {
+      return COSMIC_THEME;
+    }
+
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return storedTheme === CLASSIC_THEME ? CLASSIC_THEME : COSMIC_THEME;
+  });
   const [sendingLink, setSendingLink] = useState(false);
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
@@ -888,6 +1090,18 @@ export default function App() {
   const [sessionMessage, setSessionMessage] = useState('');
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return () => {};
+    }
+
+    document.body.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    window.dispatchEvent(new CustomEvent('birthday:theme-change', { detail: { theme } }));
+
+    return () => {};
+  }, [theme]);
 
   useEffect(() => {
     const trimmedEmail = email.trim();
@@ -1146,6 +1360,12 @@ export default function App() {
     setActiveView('admin');
   };
 
+  const toggleTheme = () => {
+    setTheme((currentTheme) => (
+      currentTheme === COSMIC_THEME ? CLASSIC_THEME : COSMIC_THEME
+    ));
+  };
+
   if (authLoading) {
     return (
       <div className="auth-shell">
@@ -1200,8 +1420,7 @@ export default function App() {
   if (activeView === 'admin' && role === 'admin') {
     return (
       <>
-        <AdminDashboard
-          onSignOut={handleSignOutRequest}
+      <AdminDashboard
           onBackHome={() => setActiveView('home')}
           userEmail={session.user?.email}
         />
@@ -1223,6 +1442,8 @@ export default function App() {
         userEmail={session.user?.email}
         isAdmin={role === 'admin'}
         sessionMessage={sessionMessage}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
       <SignOutConfirmModal
         open={signOutConfirmOpen}

@@ -263,7 +263,7 @@ function GroupSubmissionCard({ row, signedUrls }) {
   );
 }
 
-export default function AdminDashboard({ onSignOut, onBackHome, userEmail }) {
+export default function AdminDashboard({ onBackHome, userEmail }) {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -391,9 +391,6 @@ export default function AdminDashboard({ onSignOut, onBackHome, userEmail }) {
               Back to birthday
             </button>
           ) : null}
-          <button className="admin-topbar__button admin-topbar__button--ghost" type="button" onClick={onSignOut}>
-            Sign out
-          </button>
         </div>
       </header>
 
@@ -492,9 +489,6 @@ export default function AdminDashboard({ onSignOut, onBackHome, userEmail }) {
         <div className="admin-dock__actions">
           <button className="admin-dock__button" type="button" onClick={refreshInbox} disabled={refreshing || loading}>
             {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
-          <button className="admin-dock__button admin-dock__button--ghost" type="button" onClick={onSignOut}>
-            Sign out
           </button>
         </div>
       </footer>
