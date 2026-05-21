@@ -872,8 +872,8 @@ function BirthdayExperience({
           <span className="popup-close" onClick={() => window.closeMusic?.()}>&times;</span>
 
           <div className="music-player">
+            <div className="music-player__emoji-layer" id="musicEmojiLayer" aria-hidden="true" />
             <div className="music-player__header">
-              <span className="music-player__eyebrow">Birthday radio</span>
               <h2>Playlist for MJ</h2>
               <p>Soft songs, birthday glow, and a little extra drama.</p>
             </div>

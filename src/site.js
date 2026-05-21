@@ -44,6 +44,7 @@ let countdownIntervalId;
 let confettiRainIntervalId;
 let heartRainIntervalId;
 let cardHeartIntervalId;
+let musicEmojiIntervalId;
 let introMusicStopTimer;
 let introCandleTimer;
 let introCutTimer;
@@ -435,6 +436,7 @@ const overlayClickHandler = () => {
     audioPlayer.pause();
     isPlaying = false;
     updateMusicUI();
+    stopMusicEmojiFloat();
   }
 };
 overlay.addEventListener("click", overlayClickHandler);
@@ -1031,6 +1033,7 @@ function closeMusic() {
     isPlaying = false;
     updateMusicUI();
   }
+  stopMusicEmojiFloat();
 }
 /* =========================
    YOUTUBE MUSIC PLAYER
@@ -1073,6 +1076,7 @@ const musicProgressFill = document.getElementById("musicProgressFill");
 const musicCurrentTime = document.getElementById("musicCurrentTime");
 const musicDuration = document.getElementById("musicDuration");
 const musicTrackList = document.getElementById("musicTrackList");
+const musicEmojiLayer = document.getElementById("musicEmojiLayer");
 
 function formatTrackTime(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) {
@@ -1123,8 +1127,46 @@ function updateMusicUI() {
   playBtn.textContent = isPlaying ? "\u{23F8}" : "\u{25B6}";
   playBtn.setAttribute("aria-label", isPlaying ? "Pause song" : "Play song");
   songStatus.textContent = isPlaying ? "Now Playing" : "Paused";
+  musicPopup?.classList.toggle("is-playing", isPlaying);
   renderMusicQueue();
   updateMusicProgress();
+}
+
+function spawnMusicEmoji() {
+  if (!musicEmojiLayer || !musicPopup?.classList.contains("show-popup")) {
+    return;
+  }
+
+  const emoji = document.createElement("span");
+  emoji.className = "music-floating-emoji";
+  emoji.textContent = ["\u{1F3B5}", "\u{1F3B6}", "\u{2728}", "\u{1F496}", "\u{1F49F}"][Math.floor(Math.random() * 5)];
+  emoji.style.left = `${12 + Math.random() * 76}%`;
+  emoji.style.bottom = `${8 + Math.random() * 18}%`;
+  emoji.style.setProperty("--xMove", `${(Math.random() - 0.5) * 120}px`);
+  emoji.style.setProperty("--yMove", `${-(120 + Math.random() * 170)}px`);
+  emoji.style.setProperty("--spin", `${(Math.random() - 0.5) * 36}deg`);
+  emoji.style.animationDuration = `${2.2 + Math.random() * 1.1}s`;
+
+  musicEmojiLayer.appendChild(emoji);
+  setTimeout(() => emoji.remove(), 3600);
+}
+
+function startMusicEmojiFloat() {
+  if (!musicEmojiLayer || prefersReducedMotion) {
+    return;
+  }
+
+  stopMusicEmojiFloat();
+  spawnMusicEmoji();
+  spawnMusicEmoji();
+  musicEmojiIntervalId = setInterval(spawnMusicEmoji, 520);
+}
+
+function stopMusicEmojiFloat() {
+  if (musicEmojiIntervalId) {
+    clearInterval(musicEmojiIntervalId);
+    musicEmojiIntervalId = undefined;
+  }
 }
 
 audioPlayer.onended = () => {
@@ -1150,16 +1192,19 @@ function playSong() {
         songStatus.textContent = "Tap play again";
       }
       updateMusicUI();
+      stopMusicEmojiFloat();
     });
   }
   isPlaying = true;
   updateMusicUI();
+  startMusicEmojiFloat();
 }
 
 function pauseSong() {
   audioPlayer.pause();
   isPlaying = false;
   updateMusicUI();
+  stopMusicEmojiFloat();
 }
 
 function loadSong(index, autoplay = true) {
@@ -1180,9 +1225,11 @@ function loadSong(index, autoplay = true) {
           songStatus.textContent = "Tap play again";
         }
         updateMusicUI();
+        stopMusicEmojiFloat();
       });
     }
     isPlaying = true;
+    startMusicEmojiFloat();
   }
 
   updateMusicUI();
@@ -1418,6 +1465,7 @@ return () => {
   aboutTypingTimeouts.forEach(timeout => clearTimeout(timeout));
   aboutTypingTimeouts = [];
   if (audioPlayer) audioPlayer.pause();
+  stopMusicEmojiFloat();
   if (bgLoop) bgLoop.pause();
   stopIntroMusic();
   if (stopCosmicBackdrop) stopCosmicBackdrop();

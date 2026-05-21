@@ -3052,6 +3052,14 @@ header p {
   text-align: left;
 }
 
+.music-player__emoji-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
 .music-player::before {
   content: "";
   position: absolute;
@@ -3142,6 +3150,12 @@ header p {
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.36),
     0 0 40px rgba(255, 126, 180, 0.2);
+  animation: musicDiscSpin 7s linear infinite;
+  animation-play-state: paused;
+}
+
+.music-popup.is-playing .music-player__disc {
+  animation-play-state: running;
 }
 
 .music-player__disc::before {
@@ -3161,6 +3175,18 @@ header p {
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff8f0, #ffb7ce 46%, #8f1f45 100%);
   box-shadow: 0 0 20px rgba(255, 214, 226, 0.3);
+}
+
+.music-floating-emoji {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 14%;
+  font-size: clamp(1rem, 4vw, 1.55rem);
+  line-height: 1;
+  opacity: 0;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.34));
+  animation: musicEmojiFloat 2.8s ease-out forwards;
 }
 
 .music-player__track {
@@ -3295,6 +3321,33 @@ header p {
   font-family: 'Space Mono', monospace;
   font-size: 0.68rem;
   text-transform: uppercase;
+}
+
+@keyframes musicDiscSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes musicEmojiFloat {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.72) rotate(0deg);
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--xMove, 0), var(--yMove, -180px), 0) scale(1.18) rotate(var(--spin, 18deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-player__disc,
+  .music-floating-emoji {
+    animation: none !important;
+  }
 }
 
 @media (max-width: 520px) {
