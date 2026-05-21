@@ -478,7 +478,7 @@ function closeParty() {
    COUNTDOWN
 ========================= */
 let countdownEl = document.getElementById("countdown");
-let targetDate = new Date("April 7, 2026 00:00:00").getTime();
+let targetDate = new Date("May 29, 2026 00:00:00").getTime();
 
 function updateCountdown() {
   if (!countdownEl) {
@@ -552,7 +552,7 @@ function quickReply(type) {
 
   if (type === "birthday") {
     userText = "\u{1F382} Birthday?";
-    reply = "7th April \u{1F389}";
+    reply = "29th May \u{1F389}";
   } else if (type === "age") {
     userText = "\u{1F388} Age?";
     reply = "A beautiful legend growing  \u{1F60E}";
@@ -1037,15 +1037,15 @@ function closeMusic() {
 ========================= */
 const songs = [
   {
-    title: "Song 1",
+    title: "Birthday Track 1",
     url: "/1.mp3"
   },
   {
-    title: "Song 2",
+    title: "Birthday Track 2",
     url: "/2.mp3"
   },
   {
-    title: "Song 3",
+    title: "Birthday Track 3",
     url: "/3.mp3"
   },
   // {
@@ -1069,18 +1069,70 @@ const playBtn = document.getElementById("playBtn");
 const nextBtn = document.getElementById("nextBtn");
 const prevBtn = document.getElementById("prevBtn");
 const playlistCount = document.getElementById("playlistCount");
+const musicProgressFill = document.getElementById("musicProgressFill");
+const musicCurrentTime = document.getElementById("musicCurrentTime");
+const musicDuration = document.getElementById("musicDuration");
+const musicTrackList = document.getElementById("musicTrackList");
+
+function formatTrackTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${remainingSeconds}`;
+}
+
+function renderMusicQueue() {
+  if (!musicTrackList) {
+    return;
+  }
+
+  musicTrackList.innerHTML = songs.map((song, index) => `
+    <div class="music-queue-item${index === currentSong ? " is-active" : ""}">
+      <span class="music-queue-item__number">${String(index + 1).padStart(2, "0")}</span>
+      <span class="music-queue-item__title">${song.title}</span>
+      <span class="music-queue-item__tag">${index === currentSong ? "Live" : "Queue"}</span>
+    </div>
+  `).join("");
+}
+
+function updateMusicProgress() {
+  if (musicProgressFill) {
+    const duration = audioPlayer.duration;
+    const progress = Number.isFinite(duration) && duration > 0
+      ? Math.min(100, (audioPlayer.currentTime / duration) * 100)
+      : 0;
+    musicProgressFill.style.width = `${progress}%`;
+  }
+
+  if (musicCurrentTime) {
+    musicCurrentTime.textContent = formatTrackTime(audioPlayer.currentTime);
+  }
+
+  if (musicDuration) {
+    musicDuration.textContent = formatTrackTime(audioPlayer.duration);
+  }
+}
 
 function updateMusicUI() {
   if (!songTitle || !songStatus || !playBtn || !playlistCount) return;
   songTitle.textContent = songs[currentSong].title;
   playlistCount.textContent = `${currentSong + 1} / ${songs.length}`;
   playBtn.textContent = isPlaying ? "\u{23F8}" : "\u{25B6}";
-  songStatus.textContent = isPlaying ? "Now Playing \u{1F3B6}" : "Paused \u{23F8}";
+  playBtn.setAttribute("aria-label", isPlaying ? "Pause song" : "Play song");
+  songStatus.textContent = isPlaying ? "Now Playing" : "Paused";
+  renderMusicQueue();
+  updateMusicProgress();
 }
 
 audioPlayer.onended = () => {
   nextSong();
 };
+
+audioPlayer.ontimeupdate = updateMusicProgress;
+audioPlayer.onloadedmetadata = updateMusicProgress;
 
 function playSong() {
   if (bgm) {
@@ -1183,8 +1235,8 @@ const aboutPoints = [
   "• likes grey colour",
   "• Surname = Burde",
   "• I met her on 13/04/2026 on behalf of blocked by Honey bunn",
-  "• Time = 1:51 She confronts me and said (. .... ...) on 30th April 2026",
-  "• shoe size 7 no.",
+  "• Time = 1:51 She confronts me and said (. .... ...) on 29th May 2008",
+  "• shoe size 8 no.",
   "• overthinker",
   "• submissive baddie",
   "• likes colour grey",

@@ -94,8 +94,8 @@ const cards = [
 
 const flowerAsset = '/mj_pic2.png';
 const heroBackgroundVideo = '/bg_video.mp4';
-const birthdayMonthIndex = 3;
-const birthdayDay = 7;
+const birthdayMonthIndex = 4;
+const birthdayDay = 29;
 const chatQuickActions = [
   { label: '✨ Who is MJ?', query: 'who is MJ' },
   { label: '🎁 Surprise clue', query: 'What should I open first?' },
@@ -212,7 +212,7 @@ const getChatReply = (message) => {
   }
 
   if (/(birthday|date|when)/.test(normalized)) {
-    return '7th April is the day we are celebrating here. 🎉';
+    return '29th May is the day we are celebrating here. 🎉';
   }
 
   if (/(age|old|years?)/.test(normalized)) {
@@ -713,7 +713,7 @@ function BirthdayExperience({
         <h1 className="intro-text">
           <span>FOR THE GIRL</span>
           <span>WHO OWNS MY HEART</span>
-          <span>7TH APRIL 2008</span>
+          <span>29TH MAY 2008</span>
           <span>#SUBMISSIVE BADDIE</span>
           <span>#KNIGHT</span>
         </h1>
@@ -726,7 +726,10 @@ function BirthdayExperience({
       <main id="mainContent" className="home-shell">
         <div className="home-shell__heading">
           <h2 className="home-shell__title">Happy Birthday</h2>
-          <div className="home-shell__subtitle">Samruddhi</div>
+          <div className="home-shell__subtitle-wrap">
+            <div className="home-shell__subtitle">Samruddhi</div>
+            <img className="home-shell__bow" src="/samruddhi-bow.avif" alt="" aria-hidden="true" />
+          </div>
         </div>
         <section className={`cards-stage ${cardsVisible ? 'is-visible' : ''}`}>
           <div className="cards-thread" aria-hidden="true">
@@ -865,27 +868,51 @@ function BirthdayExperience({
           <div id="heartBurstContainer" />
         </div>
 
-        <div id="musicPopup" className="popup-box small-popup">
+        <div id="musicPopup" className="popup-box music-popup">
           <span className="popup-close" onClick={() => window.closeMusic?.()}>&times;</span>
-          <h2>🎵 Birthday Playlist</h2>
 
-          <div className="music-box">
-            <h3 id="songTitle">Song 1</h3>
-            <p id="songStatus">Ready to play 🎶</p>
+          <div className="music-player">
+            <div className="music-player__header">
+              <span className="music-player__eyebrow">Birthday radio</span>
+              <h2>Playlist for MJ</h2>
+              <p>Soft songs, birthday glow, and a little extra drama.</p>
+            </div>
 
-            <div className="music-controls">
-              <button className="primary-btn" id="prevBtn">
+            <div className="music-player__stage">
+              <div className="music-player__disc" aria-hidden="true">
+                <span className="music-player__disc-core" />
+              </div>
+
+              <div className="music-player__track">
+                <span className="music-player__status" id="songStatus">Ready to play</span>
+                <h3 id="songTitle">Song 1</h3>
+                <span className="music-player__count" id="playlistCount">1 / 3</span>
+              </div>
+            </div>
+
+            <div className="music-player__progress" aria-hidden="true">
+              <div className="music-player__progress-bar">
+                <span id="musicProgressFill" />
+              </div>
+              <div className="music-player__time">
+                <span id="musicCurrentTime">0:00</span>
+                <span id="musicDuration">0:00</span>
+              </div>
+            </div>
+
+            <div className="music-controls" aria-label="Music controls">
+              <button className="music-control-btn" id="prevBtn" type="button" aria-label="Previous song">
                 ⏮
               </button>
-              <button className="primary-btn" id="playBtn">
+              <button className="music-control-btn music-control-btn--play" id="playBtn" type="button" aria-label="Play or pause">
                 ▶
               </button>
-              <button className="primary-btn" id="nextBtn">
+              <button className="music-control-btn" id="nextBtn" type="button" aria-label="Next song">
                 ⏭
               </button>
             </div>
 
-            <p id="playlistCount">1 / 5</p>
+            <div className="music-player__queue" id="musicTrackList" aria-label="Playlist songs" />
           </div>
         </div>
 

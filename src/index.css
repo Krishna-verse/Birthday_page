@@ -3023,44 +3023,311 @@ header p {
 
 
 /* MUSIC PLAYER */
-.music-box {
-  text-align: center;
-  margin-top: 20px;
+.music-popup {
+  width: min(92vw, 520px);
+  max-width: 520px;
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(255, 214, 226, 0.22);
+  background:
+    radial-gradient(circle at 16% 8%, rgba(255, 214, 226, 0.2), transparent 26%),
+    radial-gradient(circle at 84% 12%, rgba(255, 107, 138, 0.16), transparent 24%),
+    linear-gradient(160deg, rgba(24, 18, 28, 0.98), rgba(7, 7, 10, 0.98));
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+.music-popup .popup-close {
+  top: 14px;
+  right: 16px;
+  z-index: 4;
+}
+
+.music-player {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(24px, 4vw, 34px);
+  color: #fff8f0;
+  text-align: left;
+}
+
+.music-player::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 107, 138, 0.07) 0 14px,
+      transparent 14px 68px,
+      rgba(245, 200, 66, 0.055) 68px 82px,
+      transparent 82px 138px
+    );
+  opacity: 0.72;
+  animation: birthdayRibbonDrift 12s linear infinite;
+}
+
+.music-player__header {
+  display: grid;
+  gap: 7px;
+  max-width: 86%;
+}
+
+.music-player__eyebrow,
+.music-player__status,
+.music-player__count {
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffd6e3;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.music-player__eyebrow,
+.music-player__status {
+  padding: 7px 10px;
+}
+
+.music-player__count {
+  padding: 6px 9px;
+  color: rgba(255, 248, 240, 0.76);
+}
+
+.music-player__header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-family: 'Strong', 'Matcha Cih', 'Segoe UI', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 2.55rem);
+  line-height: 1;
+}
+
+.music-player__header p {
+  margin: 0;
+  color: rgba(255, 248, 240, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.music-player__stage {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 26px);
+  align-items: center;
+  margin-top: clamp(24px, 5vw, 34px);
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255, 214, 226, 0.12), transparent 26%),
+    rgba(255, 255, 255, 0.055);
+}
+
+.music-player__disc {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(112px, 26vw, 148px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #161116 0 12%, transparent 13%),
+    conic-gradient(from 12deg, #ff7eb4, #f5c842, #fff8f0, #bc5470, #ff7eb4);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.36),
+    0 0 40px rgba(255, 126, 180, 0.2);
+}
+
+.music-player__disc::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.34), transparent 14%),
+    linear-gradient(145deg, rgba(15, 15, 20, 0.96), rgba(35, 26, 37, 0.98));
+}
+
+.music-player__disc-core {
+  position: relative;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff8f0, #ffb7ce 46%, #8f1f45 100%);
+  box-shadow: 0 0 20px rgba(255, 214, 226, 0.3);
+}
+
+.music-player__track {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+#songTitle {
+  margin: 0;
+  color: #ffffff;
+  font-family: 'Strong', 'Matcha Cih', 'Segoe UI', sans-serif;
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.music-player__progress {
+  margin-top: 22px;
+}
+
+.music-player__progress-bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
+.music-player__progress-bar span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd6e3, #ff7eb4, #f5c842);
+  transition: width 180ms linear;
+}
+
+.music-player__time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: rgba(255, 248, 240, 0.66);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
 }
 
 .music-controls {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 20px 0;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0 0;
 }
 
-.music-controls .primary-btn {
-  min-width: 60px;
-  font-size: 20px;
-  padding: 12px 16px;
-  color: #111111;
-  font-family: 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+.music-control-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff8f0;
+  font-family: 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+  font-size: 1.12rem;
   line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-#songTitle {
-  font-size: 1.4rem;
-  margin-bottom: 8px;
+.music-control-btn--play {
+  width: 66px;
+  background: linear-gradient(135deg, #ffd6e3, #ff7eb4 54%, #f5c842);
+  color: #151015;
+  border-color: rgba(255, 255, 255, 0.34);
+  font-size: 1.32rem;
 }
 
-#songStatus {
-  opacity: 0.85;
-  font-size: 0.95rem;
+.music-control-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 214, 226, 0.32);
+  background: rgba(255, 255, 255, 0.14);
 }
 
-#playlistCount {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  opacity: 0.8;
+.music-control-btn--play:hover {
+  background: linear-gradient(135deg, #fff1f7, #ff8ec1 54%, #ffd66b);
+}
+
+.music-player__queue {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.music-queue-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 248, 240, 0.72);
+  font-size: 0.9rem;
+}
+
+.music-queue-item.is-active {
+  border-color: rgba(255, 126, 180, 0.32);
+  background: rgba(255, 126, 180, 0.12);
+  color: #ffffff;
+}
+
+.music-queue-item__number {
+  color: #ffd6e3;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.music-queue-item__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-queue-item__tag {
+  color: rgba(245, 200, 66, 0.86);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  .music-player {
+    padding: 24px 18px 20px;
+  }
+
+  .music-player__header {
+    max-width: calc(100% - 34px);
+  }
+
+  .music-player__stage {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .music-player__track {
+    justify-items: center;
+  }
+
+  .music-controls {
+    gap: 10px;
+  }
+
+  .music-control-btn {
+    width: 44px;
+  }
+
+  .music-control-btn--play {
+    width: 60px;
+  }
 }
 
 /* Hide YouTube player completely for audio-only feel */
@@ -3401,6 +3668,7 @@ header p {
   justify-content: center;
   justify-items: center;
   padding: calc(var(--home-stack-gap) * 0.9) 16px 0;
+  position: relative;
 }
 
 .home-shell__title {
@@ -3450,6 +3718,25 @@ header p {
   -webkit-text-fill-color: transparent;
   text-shadow: 0 8px 22px rgba(94, 23, 26, 0.12);
   animation: birthdayGradientShift 6s ease-in-out infinite reverse;
+}
+
+.home-shell__subtitle-wrap {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding-inline: clamp(18px, 4vw, 46px);
+}
+
+.home-shell__bow {
+  position: absolute;
+  top: clamp(-16px, -1.5vw, -8px);
+  right: clamp(2px, 0.4vw, 12px);
+  z-index: 2;
+  width: clamp(28px, 4vw, 54px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.32));
+  transform: rotate(13deg);
 }
 
 .home-shell::before,
@@ -8371,6 +8658,17 @@ body[data-theme='classic'] .timeline-card__glow {
     -8px 10px 22px rgba(190, 190, 190, 0.12);
 }
 
+.feature-card--thank-you::after,
+body[data-theme='cosmic'] .feature-card--thank-you::after,
+body[data-theme='classic'] .feature-card--thank-you::after {
+  background:
+    radial-gradient(circle at 34% 66%, rgba(255, 255, 255, 0.58), transparent 18%),
+    linear-gradient(135deg, rgba(255, 241, 247, 0.98), rgba(255, 153, 190, 0.94) 48%, rgba(188, 84, 112, 0.96));
+  box-shadow:
+    -16px 18px 34px rgba(255, 183, 206, 0.16),
+    -8px 10px 22px rgba(255, 107, 138, 0.18);
+}
+
 .feature-card > * {
   position: relative;
   z-index: 1;
@@ -9594,6 +9892,20 @@ body[data-theme='classic'] #mainContent.home-shell::before {
       transparent 94px 152px
     ),
     linear-gradient(180deg, #0b0b10 0%, #151018 48%, #050506 100%) !important;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-size:
+    auto,
+    auto,
+    auto,
+    260px 260px,
+    auto;
+  animation: birthdayRibbonDrift 10s linear infinite;
+  will-change: background-position;
   opacity: 1;
 }
 
@@ -9609,6 +9921,33 @@ body[data-theme='classic'] #mainContent.home-shell::after {
     linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 28%, rgba(245, 200, 66, 0.04) 50%, transparent 72%, rgba(255, 107, 138, 0.035)) !important;
   mix-blend-mode: screen;
   opacity: 1;
+}
+
+@keyframes birthdayRibbonDrift {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      180px -180px,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mainContent.home-shell::before,
+  body[data-theme='cosmic'] #mainContent.home-shell::before,
+  body[data-theme='classic'] #mainContent.home-shell::before {
+    animation: none !important;
+  }
 }
 
 @media (max-width: 768px) {
