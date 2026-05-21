@@ -744,7 +744,6 @@ function BirthdayExperience({
                   <div className="feature-card__icon">{card.icon}</div>
                   <h2>{card.title}</h2>
                   <p>{card.text}</p>
-                  <div className="feature-card__shine" />
                 </article>
               </div>
             ))}
@@ -776,7 +775,6 @@ function BirthdayExperience({
                 <h2>Thank You</h2>
                 <p>Leave a note, voice, photo, or video</p>
                 <span className="feature-card__badge">Open the studio</span>
-                <div className="feature-card__shine" />
               </article>
             </div>
           ) : null}

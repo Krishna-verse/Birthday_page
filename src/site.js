@@ -228,7 +228,7 @@ function spawnPetals() {
     return;
   }
 
-  const petals = ["ðŸŒ¸", "âœ¨", "ðŸŽŠ", "â­", "ðŸ’›", "ðŸŽˆ", "ðŸŒŸ", "ðŸ’«", "ðŸŽ‰"];
+  const petals = ["\u{1F338}", "\u{2728}", "\u{1F38A}", "\u{2B50}", "\u{1F49B}", "\u{1F388}", "\u{1F31F}", "\u{1F4AB}", "\u{1F389}"];
 
   for (let i = 0; i < 18; i++) {
     const petal = document.createElement("span");
@@ -481,7 +481,7 @@ function updateCountdown() {
   let gap = targetDate - now;
 
   if (gap <= 0) {
-    countdownEl.innerHTML = "ðŸŽ‰ It's Today! ðŸŽ‰";
+    countdownEl.innerHTML = "\u{1F389} It's Today! \u{1F389}";
     return;
   }
 
@@ -490,7 +490,7 @@ function updateCountdown() {
   let m = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
   let s = Math.floor((gap % (1000 * 60)) / 1000);
 
-  countdownEl.innerHTML = `â³ ${d} Days ${h}h ${m}m ${s}s left`;
+  countdownEl.innerHTML = `\u{23F3} ${d} Days ${h}h ${m}m ${s}s left`;
 }
 if (countdownEl) {
   countdownIntervalId = setInterval(updateCountdown, 1000);
@@ -503,20 +503,20 @@ if (countdownEl) {
 let pageURL = window.location.href;
 
 function shareWhatsApp() {
-  let text = "ðŸŽ‰ Check out this amazing birthday page! ðŸŽ‚ðŸ‘‡\n" + pageURL;
+  let text = "\u{1F389} Check out this amazing birthday page! \u{1F382}\u{1F447}\n" + pageURL;
   let url = "https://wa.me/?text=" + encodeURIComponent(text);
   window.open(url, "_blank");
 }
 
 function copyLink() {
   navigator.clipboard.writeText(pageURL);
-  document.getElementById("copyMsg").innerText = "âœ… Link Copied!";
+  document.getElementById("copyMsg").innerText = "\u{2705} Link Copied!";
 }
 
 function nativeShare() {
   if (navigator.share) {
     navigator.share({
-      title: "Birthday Celebration ðŸŽ‰",
+      title: "Birthday Celebration \u{1F389}",
       text: "Check out this awesome birthday page!",
       url: pageURL
     });
@@ -543,28 +543,28 @@ function quickReply(type) {
   let reply = "";
 
   if (type === "birthday") {
-    userText = "ðŸŽ‚ Birthday?";
-    reply = "7th April ðŸŽ‰";
+    userText = "\u{1F382} Birthday?";
+    reply = "7th April \u{1F389}";
   } else if (type === "age") {
-    userText = "ðŸŽˆ Age?";
-    reply = "A beautiful legend growing  ðŸ˜Ž";
+    userText = "\u{1F388} Age?";
+    reply = "A beautiful legend growing  \u{1F60E}";
   } else if (type === "hobby") {
-    userText = "ðŸŽ® Hobbies?";
-    reply = "Gaming, fun, vibes and making memories âœ¨";
+    userText = "\u{1F3AE} Hobbies?";
+    reply = "Gaming, fun, vibes and making memories \u{2728}";
   }
 
   chatBody.innerHTML += `<div class="user-msg">${userText}</div>`;
 
   let typingDiv = document.createElement("div");
   typingDiv.className = "typing";
-  typingDiv.innerText = "ðŸ¤– Typing";
+  typingDiv.innerText = "\u{1F916} Typing";
   chatBody.appendChild(typingDiv);
 
   chatBody.scrollTop = chatBody.scrollHeight;
 
   setTimeout(() => {
     typingDiv.remove();
-    chatBody.innerHTML += `<div class="bot-msg">ðŸ¤– ${reply}</div>`;
+    chatBody.innerHTML += `<div class="bot-msg">\u{1F916} ${reply}</div>`;
     chatBody.scrollTop = chatBody.scrollHeight;
   }, 1200);
 }
@@ -750,7 +750,7 @@ function createObject() {
   let obj = document.createElement("div");
   let isBomb = Math.random() < 0.2;
 
-  obj.innerText = isBomb ? "ðŸ’£" : "ðŸŽ‚";
+  obj.innerText = isBomb ? "\u{1F4A3}" : "\u{1F382}";
   obj.className = isBomb ? "bomb" : "cake";
 
   obj.style.left = Math.random() * 90 + "%";
@@ -792,7 +792,7 @@ function loadLeaderboard() {
   let scores = JSON.parse(localStorage.getItem("leaderboard")) || [];
   leaderboardEl.innerHTML = "";
   scores.forEach((s, i) => {
-    leaderboardEl.innerHTML += `<li>ðŸ… ${i + 1}. ${s}</li>`;
+    leaderboardEl.innerHTML += `<li>\u{1F3C6} ${i + 1}. ${s}</li>`;
   });
 }
 
@@ -847,7 +847,7 @@ generateRizzBtn.addEventListener("click", () => {
   rizzOutput.innerHTML = `
     <div class="rizz-card">
       <div id="rizzText" class="rizz-text typing-cursor"></div>
-      <button id="copyRizzBtn" class="copy-btn" style="display:none;">ðŸ“‹ Copy</button>
+      <button id="copyRizzBtn" class="copy-btn" style="display:none;">\u{1F4CB} Copy</button>
     </div>
   `;
 
@@ -859,8 +859,8 @@ generateRizzBtn.addEventListener("click", () => {
       const text = document.getElementById("rizzText").innerText;
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById("copyRizzBtn");
-        btn.textContent = "âœ… Copied!";
-        setTimeout(() => btn.textContent = "ðŸ“‹ Copy", 2000);
+        btn.textContent = "\u{2705} Copied!";
+        setTimeout(() => btn.textContent = "\u{1F4CB} Copy", 2000);
       });
     });
   });
@@ -894,7 +894,7 @@ function typeWriterEffect(text, element, callback) {
 }
 
 function heartBurst() {
-  const hearts = ["ðŸ’–", "ðŸ’˜", "ðŸ’•", "â¤ï¸", "ðŸ’ž"];
+  const hearts = ["\u{1F496}", "\u{1F498}", "\u{1F495}", "\u{2764}\u{FE0F}", "\u{1F49E}"];
 
   for (let i = 0; i < 14; i++) {
     const heart = document.createElement("span");
@@ -926,7 +926,7 @@ function fireHeartBurst(count = 14) {
     return;
   }
 
-  const hearts = ["ðŸ’–", "ðŸ’˜", "ðŸ’•", "â¤ï¸", "ðŸ’ž"];
+  const hearts = ["\u{1F496}", "\u{1F498}", "\u{1F495}", "\u{2764}\u{FE0F}", "\u{1F49E}"];
 
   for (let i = 0; i < count; i++) {
     const heart = document.createElement("span");
@@ -1006,8 +1006,8 @@ function updateMusicUI() {
   if (!songTitle || !songStatus || !playBtn || !playlistCount) return;
   songTitle.textContent = songs[currentSong].title;
   playlistCount.textContent = `${currentSong + 1} / ${songs.length}`;
-  playBtn.textContent = isPlaying ? "â¸" : "â–¶";
-  songStatus.textContent = isPlaying ? "Now Playing ðŸŽ¶" : "Paused â¸";
+  playBtn.textContent = isPlaying ? "\u{23F8}" : "\u{25B6}";
+  songStatus.textContent = isPlaying ? "Now Playing \u{1F3B6}" : "Paused \u{23F8}";
 }
 
 audioPlayer.onended = () => {
@@ -1241,7 +1241,7 @@ function startFloatingEffects() {
   const container = document.getElementById("aboutImageWrap");
   if (!container) return;
   floatingInterval = setInterval(() => {
-    const symbols = ["ðŸ’–", "âœ¨", "ðŸŒ¸", "â­", "ðŸ’˜"];
+    const symbols = ["\u{1F496}", "\u{2728}", "\u{1F338}", "\u{2B50}", "\u{1F498}"];
     const item = document.createElement("span");
     item.className = "floating-item";
     item.textContent = symbols[Math.floor(Math.random() * symbols.length)];
@@ -1303,5 +1303,3 @@ return () => {
   if (stopCosmicBackdrop) stopCosmicBackdrop();
 };
 }
-
-
